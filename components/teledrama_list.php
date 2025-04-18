@@ -55,6 +55,7 @@ $stmt->execute();
                         <span aria-hidden="true">»</span>
                     </a>
                 </li>
+                
             </ul>
         </nav>
     <?php } ?>

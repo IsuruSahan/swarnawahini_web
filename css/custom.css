@@ -107,7 +107,7 @@ body {
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 5px #FFC107;
+    box-shadow: 0 6px 5px #000000;
 }
 
 .card-img-top {

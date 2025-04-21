@@ -12,7 +12,7 @@ $teledrama = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$teledrama) {
     die("Teledrama not found.");
 }
-
+//test commit
 // YouTube API setup
 $api_key = 'AIzaSyBAON_ChCgF5BEXX7ijp--GImeRmAHdUBY'; // Your provided API key
 $playlist_id = $teledrama['youtube_playlist'];
@@ -73,7 +73,7 @@ require 'components/header.php';
                 </div>
             </div>
         <?php } ?>
-        <?php if (empty($episodes)) { ?>
+        <?php if (empty($episodes)) { ?> 
             <div class="col">
                 <p>No episodes found for this playlist.</p>
             </div>

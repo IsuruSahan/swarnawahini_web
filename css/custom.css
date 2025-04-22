@@ -8,7 +8,7 @@ body {
     background: #193486;
     margin: 0;
     padding: 0;
-    padding-top: 90px; /* Reserves space for navbar (~70px height + 10px top offset + buffer) */
+    padding-top: 90px; /* Default for large screens */
 }
 
 /* Navbar */
@@ -187,11 +187,106 @@ h1.page-title {
     font-weight: 700;
     color: #FFC107;
     text-align: left;
-    margin-bottom: 20px; /* Controls space between title and cards */
+    margin-bottom: 20px;
+}
+
+/* Banner Slider */
+.banner-slider {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 30px auto 10px; /* Increased margin-top to 30px for small gap */
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.banner-slides {
+    display: flex;
+    width: 100%;
+    height: 400px;
+    transition: transform 0.5s ease;
+}
+
+.banner-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    display: none;
+}
+
+.banner-slide.active {
+    display: block;
+}
+
+.banner-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+.banner-prev, .banner-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    color: #1A237E;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.banner-prev:hover, .banner-next:hover {
+    background: #FFC107;
+    color: #1A237E;
+}
+
+.banner-prev {
+    left: 10px;
+}
+
+.banner-next {
+    right: 10px;
+}
+
+/* Dots Pagination */
+.banner-dots {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.banner-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.banner-dot.active {
+    background: #FFC107;
+}
+
+.banner-dot:hover {
+    background: #ff0000;
 }
 
 /* Responsive adjustments */
 @media (max-width: 991px) {
+    body {
+        padding-top: 70px;
+    }
+
     .navbar.navbar-expand-lg.navbar-light {
         padding: 0.8rem 1rem;
         top: 5px;
@@ -225,15 +320,23 @@ h1.page-title {
     }
 
     .container.mt-5 {
-        padding-top: 70px;
+        padding-bottom: 70px;
     }
 
     h1.page-title {
         margin-bottom: 15px;
     }
+
+    .banner-slider {
+        margin: 20px auto 10px; /* Adjust margin-top for smaller screens */
+    }
 }
 
 @media (max-width: 767px) {
+    body {
+        padding-top: 60px;
+    }
+
     .row.row-cols-1.row-cols-md-3 > .col {
         flex: 0 0 100%;
         max-width: 100%;
@@ -259,9 +362,34 @@ h1.page-title {
         padding: 6px 12px;
         font-size: 13px;
     }
+
+    .banner-slider {
+        border-radius: 15px;
+        height: 200px;
+        margin: 15px auto 10px; /* Adjust margin-top for smaller screens */
+    }
+
+    .banner-slides {
+        height: 200px;
+    }
+
+    .banner-prev, .banner-next {
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    .banner-dot {
+        width: 10px;
+        height: 10px;
+        margin: 0 4px;
+    }
 }
 
 @media (max-width: 576px) {
+    body {
+        padding-top: 50px;
+    }
+
     .navbar.navbar-expand-lg.navbar-light {
         padding: 0.5rem 0.8rem;
         top: 3px;
@@ -312,7 +440,7 @@ h1.page-title {
     }
 
     .container.mt-5 {
-        padding-top: 60px;
+        padding-bottom: 60px;
     }
 
     h1.page-title {
@@ -324,134 +452,25 @@ h1.page-title {
         padding: 5px 10px;
         font-size: 12px;
     }
+
+    .banner-slider {
+        border-radius: 10px;
+        height: 150px;
+        margin: 10px auto 10px; /* Adjust margin-top for smallest screens */
+    }
+
+    .banner-slides {
+        height: 150px;
+    }
+
+    .banner-prev, .banner-next {
+        padding: 6px;
+        font-size: 14px;
+    }
+
+    .banner-dot {
+        width: 8px;
+        height: 8px;
+        margin: 0 3px;
+    }
 }
-
- .banner-slider {
-            position: relative;
-            width: 100%;
-            max-width: 1200px;
-            margin: 10px auto;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-        }
-
-        .banner-slides {
-            display: flex;
-            width: 100%;
-            height: 400px;
-            transition: transform 0.5s ease;
-        }
-
-        .banner-slide {
-            flex: 0 0 100%;
-            width: 100%;
-            display: none;
-        }
-
-        .banner-slide.active {
-            display: block;
-        }
-
-        .banner-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 20px;
-        }
-
-        .banner-prev, .banner-next {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            color: #1A237E;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 20px;
-            border-radius: 50%;
-            transition: background-color 0.3s ease;
-        }
-
-        .banner-prev:hover, .banner-next:hover {
-            background: #FFC107;
-            color: #1A237E;
-        }
-
-        .banner-prev {
-            left: 10px;
-        }
-
-        .banner-next {
-            right: 10px;
-        }
-
-        /* Dots Pagination */
-        .banner-dots {
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .banner-dot {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            margin: 0 5px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .banner-dot.active {
-            background: #FFC107;
-        }
-
-        .banner-dot:hover {
-            background: #ff0000;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 767px) {
-            .banner-slider {
-                border-radius: 15px;
-                height: 200px;
-            }
-            .banner-slides {
-                height: 200px;
-            }
-            .banner-prev, .banner-next {
-                padding: 8px;
-                font-size: 16px;
-            }
-            .banner-dot {
-                width: 10px;
-                height: 10px;
-                margin: 0 4px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .banner-slider {
-                border-radius: 10px;
-                height: 150px;
-            }
-            .banner-slides {
-                height: 150px;
-            }
-            .banner-prev, .banner-next {
-                padding: 6px;
-                font-size: 14px;
-            }
-            .banner-dot {
-                width: 8px;
-                height: 8px;
-                margin: 0 3px;
-            }
-        }
-

@@ -30,7 +30,7 @@ $stmt->execute();
                     <img src="<?php echo $thumbnail; ?>" class="card-img-top" alt="<?php echo $row['title']; ?>">
                     <div class="card-body">
                         <p class="card-text"><?php echo $row['description']; ?></p>
-                        <a href="/swarnawahini_web/teledrama_detail.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">Play list</a>
+                        <a href="/swarnawahini_web/teledrama_detail.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">Episodes</a>
                     </div>
                 </div>
             </div>

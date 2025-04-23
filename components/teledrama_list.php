@@ -12,6 +12,54 @@ $stmt = $conn->prepare("SELECT * FROM teledramas LIMIT :limit OFFSET :offset");
 $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
+
+// Function to fetch YouTube thumbnail using cURL
+function getYouTubeThumbnail($playlist_id, $api_key, $conn, $teledrama_id) {
+    // Check if thumbnail is already cached
+    $stmt = $conn->prepare("SELECT thumbnail FROM teledramas WHERE id = :id");
+    $stmt->bindValue(':id', $teledrama_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $cached_thumbnail = $stmt->fetchColumn();
+
+    if ($cached_thumbnail && $cached_thumbnail !== 'default.jpg') {
+        return $cached_thumbnail; // Use cached thumbnail if available
+    }
+
+    // Fetch thumbnail from YouTube API
+    $url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=1&playlistId=$playlist_id&key=$api_key";
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    // Log the response for debugging
+    if ($http_code !== 200 || !$response) {
+        error_log("YouTube API Error: HTTP Code $http_code, Error: $error, URL: $url, Response: $response");
+        $thumbnail = 'default.jpg';
+    } else {
+        $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE || !isset($data['items'][0]['snippet']['thumbnails']['medium']['url'])) {
+            error_log("YouTube API JSON Error: " . json_last_error_msg() . ", Response: $response");
+            $thumbnail = 'default.jpg';
+        } else {
+            $thumbnail = $data['items'][0]['snippet']['thumbnails']['medium']['url'];
+        }
+    }
+
+    // Cache the thumbnail in the database
+    $update_stmt = $conn->prepare("UPDATE teledramas SET thumbnail = :thumbnail WHERE id = :id");
+    $update_stmt->bindValue(':thumbnail', $thumbnail, PDO::PARAM_STR);
+    $update_stmt->bindValue(':id', $teledrama_id, PDO::PARAM_INT);
+    $update_stmt->execute();
+
+    return $thumbnail;
+}
 ?>
 
 <div class="container mt-5">
@@ -20,16 +68,13 @@ $stmt->execute();
         <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) { ?>
             <?php
             $playlist_id = $row['youtube_playlist'];
-            $url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=1&playlistId=$playlist_id&key=$api_key";
-            $response = file_get_contents($url);
-            $data = json_decode($response, true);
-            $thumbnail = $data['items'][0]['snippet']['thumbnails']['medium']['url'] ?? 'default.jpg';
+            $thumbnail = getYouTubeThumbnail($playlist_id, $api_key, $conn, $row['id']);
             ?>
             <div class="col">
                 <div class="card mb-4">
-                    <img src="<?php echo $thumbnail; ?>" class="card-img-top" alt="<?php echo $row['title']; ?>">
+                    <img src="<?php echo htmlspecialchars($thumbnail); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($row['title']); ?>">
                     <div class="card-body">
-                        <p class="card-text"><?php echo $row['description']; ?></p>
+                        <p class="card-text"><?php echo htmlspecialchars($row['description']); ?></p>
                         <a href="/swarnawahini_web/teledrama_detail.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">Episodes</a>
                     </div>
                 </div>
@@ -55,7 +100,6 @@ $stmt->execute();
                         <span aria-hidden="true">»</span>
                     </a>
                 </li>
-                
             </ul>
         </nav>
     <?php } ?>

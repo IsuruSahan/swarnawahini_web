@@ -5,9 +5,10 @@ require '../components/db_connect.php';
 // Initialize message variables
 $teledrama_message = '';
 $banner_message = '';
+$special_program_message = '';
 
 // Handle Teledrama Submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title']) && !isset($_POST['special_program_id'])) {
     $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING);
     $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_STRING);
     $youtube_playlist = filter_input(INPUT_POST, 'youtube_playlist', FILTER_SANITIZE_STRING);
@@ -82,8 +83,68 @@ if (isset($_GET['delete_banner']) && is_numeric($_GET['delete_banner'])) {
     }
 }
 
+// Handle Special Program Submission (Add/Edit)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['special_program_title'])) {
+    $special_program_id = filter_input(INPUT_POST, 'special_program_id', FILTER_SANITIZE_NUMBER_INT);
+    $title = filter_input(INPUT_POST, 'special_program_title', FILTER_SANITIZE_STRING);
+    $youtube_url = filter_input(INPUT_POST, 'youtube_url', FILTER_SANITIZE_URL);
+
+    // Extract YouTube video ID from URL
+    $video_id = '';
+    if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $youtube_url, $match)) {
+        $video_id = $match[1];
+    }
+
+    if (!$video_id) {
+        $special_program_message = "Invalid YouTube URL. Please use a URL like https://www.youtube.com/watch?v=VIDEO_ID";
+    } else {
+        // Construct thumbnail URL directly from video ID
+        $thumbnail_url = "https://i.ytimg.com/vi/{$video_id}/hqdefault.jpg";
+
+        // Verify thumbnail URL accessibility (optional, for debugging)
+        $headers = @get_headers($thumbnail_url);
+        if ($headers && strpos($headers[0], '200') === false) {
+            error_log("Thumbnail URL inaccessible: $thumbnail_url, Headers: " . implode(", ", $headers));
+            $thumbnail_url = 'default.jpg';
+            $special_program_message = "Thumbnail URL inaccessible. Using default image.";
+        }
+
+        if ($special_program_id) {
+            // Update existing special program
+            $stmt = $conn->prepare("UPDATE special_programs SET title = :title, youtube_url = :youtube_url, thumbnail_url = :thumbnail_url WHERE id = :id");
+            $stmt->execute([
+                ':title' => $title,
+                ':youtube_url' => $youtube_url,
+                ':thumbnail_url' => $thumbnail_url,
+                ':id' => $special_program_id
+            ]);
+            $special_program_message = "Special program updated successfully!";
+        } else {
+            // Add new special program
+            $stmt = $conn->prepare("INSERT INTO special_programs (title, youtube_url, thumbnail_url) VALUES (:title, :youtube_url, :thumbnail_url)");
+            $stmt->execute([
+                ':title' => $title,
+                ':youtube_url' => $youtube_url,
+                ':thumbnail_url' => $thumbnail_url
+            ]);
+            $special_program_message = "Special program added successfully!";
+        }
+    }
+}
+
+// Handle Special Program Deletion
+if (isset($_GET['delete_special_program']) && is_numeric($_GET['delete_special_program'])) {
+    $id = (int)$_GET['delete_special_program'];
+    $stmt = $conn->prepare("DELETE FROM special_programs WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    $special_program_message = "Special program deleted successfully!";
+}
+
 // Fetch all banners
 $banners = $conn->query("SELECT * FROM banners ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch all special programs
+$special_programs = $conn->query("SELECT * FROM special_programs ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 
 require '../components/header.php';
 ?>
@@ -119,7 +180,7 @@ require '../components/header.php';
     </section>
 
     <!-- Banner Management -->
-    <section>
+    <section class="mb-5">
         <h2 class="section-title">Manage Banners</h2>
         <?php if ($banner_message) { ?>
             <div class="alert alert-info"><?php echo htmlspecialchars($banner_message); ?></div>
@@ -152,6 +213,64 @@ require '../components/header.php';
             <p>No banners uploaded yet.</p>
         <?php } ?>
     </section>
+
+    <!-- Special Program Management -->
+    <section>
+        <h2 class="section-title">Manage Special Programs</h2>
+        <?php if ($special_program_message) { ?>
+            <div class="alert alert-info"><?php echo htmlspecialchars($special_program_message); ?></div>
+        <?php } ?>
+
+        <!-- Special Program Add/Edit Form -->
+        <form method="POST" class="glass-form mb-4">
+            <input type="hidden" name="special_program_id" id="special_program_id" value="">
+            <div class="mb-3">
+                <label for="special_program_title" class="form-label">Title</label>
+                <input type="text" id="special_program_title" name="special_program_title" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="youtube_url" class="form-label">YouTube URL</label>
+                <input type="url" id="youtube_url" name="youtube_url" class="form-control" placeholder="https://www.youtube.com/watch?v=VIDEO_ID" required>
+            </div>
+            <button type="submit" class="btn btn-primary" id="special_program_submit">Add Special Program</button>
+        </form>
+
+        <!-- Special Program List -->
+        <?php if (!empty($special_programs)) { ?>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <?php foreach ($special_programs as $program) { ?>
+                    <div class="col">
+                        <div class="card">
+                            <img src="<?php echo htmlspecialchars($program['thumbnail_url'] ?? 'default.jpg'); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($program['title']); ?>">
+                            <div class="card-body">
+                                <h6 class="card-title"><?php echo htmlspecialchars($program['title']); ?></h6>
+                                <p class="card-text"><?php echo htmlspecialchars($program['youtube_url']); ?></p>
+                                <button class="btn btn-warning edit-special-program" data-id="<?php echo $program['id']; ?>" data-title="<?php echo htmlspecialchars($program['title']); ?>" data-url="<?php echo htmlspecialchars($program['youtube_url']); ?>">Edit</button>
+                                <a href="?delete_special_program=<?php echo $program['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this special program?');">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+            </div>
+        <?php } else { ?>
+            <p>No special programs uploaded yet.</p>
+        <?php } ?>
+    </section>
 </div>
+
+<script>
+document.querySelectorAll('.edit-special-program').forEach(button => {
+    button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        const title = button.getAttribute('data-title');
+        const url = button.getAttribute('data-url');
+
+        document.getElementById('special_program_id').value = id;
+        document.getElementById('special_program_title').value = title;
+        document.getElementById('youtube_url').value = url;
+        document.getElementById('special_program_submit').textContent = 'Update Special Program';
+    });
+});
+</script>
 
 <?php require '../components/footer.php'; ?>

@@ -11,7 +11,23 @@ body {
     padding-top: 90px; /* Default for large screens */
 }
 
-/* Navbar */
+/* Existing styles */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Navbar (unchanged) */
 .navbar.navbar-expand-lg.navbar-light {
     background: rgba(0, 25, 118, 0.1);
     backdrop-filter: blur(10px);
@@ -91,6 +107,78 @@ body {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
+}
+
+/* Universal margin/padding for mobile devices */
+@media (max-width: 767px) {
+    .container, .container-fluid {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+    }
+
+    /* Ensure major sections have consistent spacing */
+    .special-program-banner,
+    .special-program-slider,
+    .teledrama-list,
+    .banner-slider {
+        margin-left: 10px !important;
+        margin-right: 10px !important;
+    }
+
+    /* Adjust elements that might still be edge-to-edge */
+    body {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-top: 80px !important; /* Account for fixed navbar height */
+    }
+
+    /* Ensure Swiper navigation buttons don’t overlap content */
+    .swiper-button-next,
+    .swiper-button-prev {
+        right: 10px;
+        left: auto;
+    }
+
+    .swiper-button-prev {
+        left: 10px;
+        right: auto;
+    }
+
+    /* Navbar mobile menu styling */
+    .navbar-collapse {
+        background: rgba(0, 25, 118, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 15px;
+        margin-top: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .nav-item {
+        margin: 10px 0;
+    }
+
+    .nav-item .nav-link {
+        font-size: 1.2rem;
+        margin-right: 0; /* Remove horizontal margin in mobile view */
+    }
+
+    .nav-item .live-button {
+        justify-content: center;
+        margin-top: 0;
+    }
+
+    /* Adjust navbar padding on mobile */
+    .navbar.navbar-expand-lg.navbar-light {
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+    }
 }
 
 /* Cards */
@@ -473,4 +561,7 @@ h1.page-title {
         height: 8px;
         margin: 0 3px;
     }
+
+
+    
 }

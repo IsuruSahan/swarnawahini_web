@@ -25,16 +25,14 @@
                         <a class="nav-link" href="/swarnawahini_web/pages/teledramas.php">Teledramas</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/swarnawahini_web/admin/dashboard.php">News</a>
+                        <a class="nav-link" href="https://liveatsrilanka.lk/">News</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/swarnawahini_web/admin/dashboard.php">Contact</a>
+                        <a class="nav-link" href="pages/contact_form_with_map.php">Contact</a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="/swarnawahini_web/admin/dashboard.php">Admin</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/swarnawahini_web/live.php" class="live-button">
+                        <a href="/swarnawahini_web/components/video_Player.php" class="live-button">
                             <span class="live-circle"></span> LIVE
                         </a>
                     </li>

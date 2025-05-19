@@ -562,6 +562,14 @@ h1.page-title {
         margin: 0 3px;
     }
 
-
+.nav-tabs .nav-link.active {
+    background-color: #ffd700; /* Gold color for active tab */
+    color: #333;
+    font-weight: bold;
+}
+.nav-tabs .nav-link {
+    color: #333;
+    border-radius: 5px 5px 0 0;
+}
     
 }

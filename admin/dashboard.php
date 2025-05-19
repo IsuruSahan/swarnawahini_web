@@ -1,11 +1,12 @@
 <?php
-$page_title = "Admin Dashboard | TV Channel";
+$page_title = "Admin Dashboard | Swarnawahini";
 require '../components/db_connect.php';
 
 // Initialize message variables
 $teledrama_message = '';
 $banner_message = '';
 $special_program_message = '';
+$contact_message = ''; // New message variable for contact section
 
 // Handle Teledrama Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title']) && !isset($_POST['special_program_id'])) {
@@ -140,11 +141,22 @@ if (isset($_GET['delete_special_program']) && is_numeric($_GET['delete_special_p
     $special_program_message = "Special program deleted successfully!";
 }
 
+// Handle Contact Message Deletion
+if (isset($_GET['delete_contact']) && is_numeric($_GET['delete_contact'])) {
+    $id = (int)$_GET['delete_contact'];
+    $stmt = $conn->prepare("DELETE FROM contact WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    $contact_message = "Contact message deleted successfully!";
+}
+
 // Fetch all banners
 $banners = $conn->query("SELECT * FROM banners ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch all special programs
 $special_programs = $conn->query("SELECT * FROM special_programs ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch all contact messages
+$contact_messages = $conn->query("SELECT * FROM contact ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 
 require '../components/header.php';
 ?>
@@ -152,110 +164,171 @@ require '../components/header.php';
 <div class="container mt-5">
     <h1 class="page-title"><?php echo $page_title; ?></h1>
 
-    <!-- Teledrama Management -->
-    <section class="mb-5">
-        <h2 class="section-title">Add New Teledrama</h2>
-        <?php if ($teledrama_message) { ?>
-            <div class="alert alert-info"><?php echo htmlspecialchars($teledrama_message); ?></div>
-        <?php } ?>
-        <form method="POST" enctype="multipart/form-data" class="glass-form">
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" id="title" name="title" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea id="description" name="description" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="mb-3">
-                <label for="youtube_playlist" class="form-label">YouTube Playlist ID</label>
-                <input type="text" id="youtube_playlist" name="youtube_playlist" class="form-control" placeholder="e.g., PLabcdef123456789" required>
-            </div>
-            <div class="mb-3">
-                <label for="cover_image" class="form-label">Cover Image</label>
-                <input type="file" id="cover_image" name="cover_image" class="form-control" accept="image/*">
-            </div>
-            <button type="submit" class="btn btn-success">Add Teledrama</button>
-        </form>
-    </section>
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="teledrama-tab" data-bs-toggle="tab" data-bs-target="#teledrama" type="button" role="tab" aria-controls="teledrama" aria-selected="true">Teledrama Management</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="banner-tab" data-bs-toggle="tab" data-bs-target="#banner" type="button" role="tab" aria-controls="banner" aria-selected="false">Banner Management</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="special-program-tab" data-bs-toggle="tab" data-bs-target="#special-program" type="button" role="tab" aria-controls="special-program" aria-selected="false">Special Program Management</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Contact Messages</button>
+        </li>
+    </ul>
 
-    <!-- Banner Management -->
-    <section class="mb-5">
-        <h2 class="section-title">Manage Banners</h2>
-        <?php if ($banner_message) { ?>
-            <div class="alert alert-info"><?php echo htmlspecialchars($banner_message); ?></div>
-        <?php } ?>
+    <!-- Tab Content -->
+    <div class="tab-content" id="dashboardTabContent">
+        <!-- Teledrama Management -->
+        <div class="tab-pane fade show active" id="teledrama" role="tabpanel" aria-labelledby="teledrama-tab">
+            <h2 class="section-title">Add New Teledrama</h2>
+            <?php if ($teledrama_message) { ?>
+                <div class="alert alert-info"><?php echo htmlspecialchars($teledrama_message); ?></div>
+            <?php } ?>
+            <form method="POST" enctype="multipart/form-data" class="glass-form">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" id="title" name="title" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="youtube_playlist" class="form-label">YouTube Playlist ID</label>
+                    <input type="text" id="youtube_playlist" name="youtube_playlist" class="form-control" placeholder="e.g., PLabcdef123456789" required>
+                </div>
+                <div class="mb-3">
+                    <label for="cover_image" class="form-label">Cover Image</label>
+                    <input type="file" id="cover_image" name="cover_image" class="form-control" accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-success">Add Teledrama</button>
+            </form>
+        </div>
 
-        <!-- Banner Upload -->
-        <form method="POST" enctype="multipart/form-data" class="glass-form mb-4">
-            <div class="mb-3">
-                <label for="banner_image" class="form-label">Upload New Banner</label>
-                <input type="file" id="banner_image" name="banner_image" class="form-control" accept="image/*" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Upload Banner</button>
-        </form>
+        <!-- Banner Management -->
+        <div class="tab-pane fade" id="banner" role="tabpanel" aria-labelledby="banner-tab">
+            <h2 class="section-title">Manage Banners</h2>
+            <?php if ($banner_message) { ?>
+                <div class="alert alert-info"><?php echo htmlspecialchars($banner_message); ?></div>
+            <?php } ?>
 
-        <!-- Banner List -->
-        <?php if (!empty($banners)) { ?>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                <?php foreach ($banners as $banner) { ?>
-                    <div class="col">
-                        <div class="card">
-                            <img src="/swarnawahini_web/uploads/banners/<?php echo htmlspecialchars($banner['image_path']); ?>" class="card-img-top" alt="Banner">
-                            <div class="card-body">
-                                <a href="?delete_banner=<?php echo $banner['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this banner?');">Delete</a>
+            <!-- Banner Upload -->
+            <form method="POST" enctype="multipart/form-data" class="glass-form mb-4">
+                <div class="mb-3">
+                    <label for="banner_image" class="form-label">Upload New Banner</label>
+                    <input type="file" id="banner_image" name="banner_image" class="form-control" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload Banner</button>
+            </form>
+
+            <!-- Banner List -->
+            <?php if (!empty($banners)) { ?>
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    <?php foreach ($banners as $banner) { ?>
+                        <div class="col">
+                            <div class="card">
+                                <img src="/swarnawahini_web/uploads/banners/<?php echo htmlspecialchars($banner['image_path']); ?>" class="card-img-top" alt="Banner">
+                                <div class="card-body">
+                                    <a href="?delete_banner=<?php echo $banner['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this banner?');">Delete</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <?php } ?>
-            </div>
-        <?php } else { ?>
-            <p>No banners uploaded yet.</p>
-        <?php } ?>
-    </section>
+                    <?php } ?>
+                </div>
+            <?php } else { ?>
+                <p>No banners uploaded yet.</p>
+            <?php } ?>
+        </div>
 
-    <!-- Special Program Management -->
-    <section>
-        <h2 class="section-title">Manage Special Programs</h2>
-        <?php if ($special_program_message) { ?>
-            <div class="alert alert-info"><?php echo htmlspecialchars($special_program_message); ?></div>
-        <?php } ?>
+        <!-- Special Program Management -->
+        <div class="tab-pane fade" id="special-program" role="tabpanel" aria-labelledby="special-program-tab">
+            <h2 class="section-title">Manage Special Programs</h2>
+            <?php if ($special_program_message) { ?>
+                <div class="alert alert-info"><?php echo htmlspecialchars($special_program_message); ?></div>
+            <?php } ?>
 
-        <!-- Special Program Add/Edit Form -->
-        <form method="POST" class="glass-form mb-4">
-            <input type="hidden" name="special_program_id" id="special_program_id" value="">
-            <div class="mb-3">
-                <label for="special_program_title" class="form-label">Title</label>
-                <input type="text" id="special_program_title" name="special_program_title" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="youtube_url" class="form-label">YouTube URL</label>
-                <input type="url" id="youtube_url" name="youtube_url" class="form-control" placeholder="https://www.youtube.com/watch?v=VIDEO_ID" required>
-            </div>
-            <button type="submit" class="btn btn-primary" id="special_program_submit">Add Special Program</button>
-        </form>
+            <!-- Special Program Add/Edit Form -->
+            <form method="POST" class="glass-form mb-4">
+                <input type="hidden" name="special_program_id" id="special_program_id" value="">
+                <div class="mb-3">
+                    <label for="special_program_title" class="form-label">Title</label>
+                    <input type="text" id="special_program_title" name="special_program_title" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="youtube_url" class="form-label">YouTube URL</label>
+                    <input type="url" id="youtube_url" name="youtube_url" class="form-control" placeholder="https://www.youtube.com/watch?v=VIDEO_ID" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="special_program_submit">Add Special Program</button>
+            </form>
 
-        <!-- Special Program List -->
-        <?php if (!empty($special_programs)) { ?>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                <?php foreach ($special_programs as $program) { ?>
-                    <div class="col">
-                        <div class="card">
-                            <img src="<?php echo htmlspecialchars($program['thumbnail_url'] ?? 'default.jpg'); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($program['title']); ?>">
-                            <div class="card-body">
-                                <h6 class="card-title"><?php echo htmlspecialchars($program['title']); ?></h6>
-                                <p class="card-text"><?php echo htmlspecialchars($program['youtube_url']); ?></p>
-                                <button class="btn btn-warning edit-special-program" data-id="<?php echo $program['id']; ?>" data-title="<?php echo htmlspecialchars($program['title']); ?>" data-url="<?php echo htmlspecialchars($program['youtube_url']); ?>">Edit</button>
-                                <a href="?delete_special_program=<?php echo $program['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this special program?');">Delete</a>
+            <!-- Special Program List -->
+            <?php if (!empty($special_programs)) { ?>
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    <?php foreach ($special_programs as $program) { ?>
+                        <div class="col">
+                            <div class="card">
+                                <img src="<?php echo htmlspecialchars($program['thumbnail_url'] ?? 'default.jpg'); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($program['title']); ?>">
+                                <div class="card-body">
+                                    <h6 class="card-title"><?php echo htmlspecialchars($program['title']); ?></h6>
+                                    <p class="card-text"><?php echo htmlspecialchars($program['youtube_url']); ?></p>
+                                    <button class="btn btn-warning edit-special-program" data-id="<?php echo $program['id']; ?>" data-title="<?php echo htmlspecialchars($program['title']); ?>" data-url="<?php echo htmlspecialchars($program['youtube_url']); ?>">Edit</button>
+                                    <a href="?delete_special_program=<?php echo $program['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this special program?');">Delete</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <?php } ?>
-            </div>
-        <?php } else { ?>
-            <p>No special programs uploaded yet.</p>
-        <?php } ?>
-    </section>
+                    <?php } ?>
+                </div>
+            <?php } else { ?>
+                <p>No special programs uploaded yet.</p>
+            <?php } ?>
+        </div>
+
+        <!-- Contact Messages -->
+        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+            <h2 class="section-title">Contact Messages</h2>
+            <?php if ($contact_message) { ?>
+                <div class="alert alert-info"><?php echo htmlspecialchars($contact_message); ?></div>
+            <?php } ?>
+
+            <!-- Contact Messages List -->
+            <?php if (!empty($contact_messages)) { ?>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Message</th>
+                                <th>Submitted At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($contact_messages as $message) { ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($message['id']); ?></td>
+                                    <td><?php echo htmlspecialchars($message['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($message['email']); ?></td>
+                                    <td><?php echo htmlspecialchars(substr($message['message'], 0, 100)) . (strlen($message['message']) > 100 ? '...' : ''); ?></td>
+                                    <td><?php echo htmlspecialchars($message['created_at']); ?></td>
+                                    <td>
+                                        <a href="?delete_contact=<?php echo $message['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this contact message?');">Delete</a>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php } else { ?>
+                <p>No contact messages submitted yet.</p>
+            <?php } ?>
+        </div>
+    </div>
 </div>
 
 <script>

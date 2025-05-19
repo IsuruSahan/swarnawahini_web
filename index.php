@@ -12,7 +12,7 @@ require 'components/header.php';
     <?php require 'components/split_layout.php'; ?>
     <br>
     <?php require 'components/special_program.php'; ?>
-  
+    <?php require 'components/logos.php'; ?>
 </main>
 
 <?php require 'components/footer.php'; ?>

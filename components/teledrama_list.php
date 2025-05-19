@@ -92,7 +92,7 @@ function getYouTubeThumbnail($playlist_id, $api_key, $conn, $teledrama_id) {
                 </li>
                 <?php for ($i = 1; $i <= $total_pages; $i++) { ?>
                     <li class="page-item <?php echo $page === $i ? 'active' : ''; ?>">
-                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                         <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
                     </li>
                 <?php } ?>
                 <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">

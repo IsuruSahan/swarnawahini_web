@@ -17,7 +17,7 @@ if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|y
     $video_id = $match[1];
 }
 
-$banner_thumbnail = $video_id ? "https://i.ytimg.com/vi/{$video_id}/hqdefault.jpg" : 'default.jpg';
+$banner_thumbnail = $video_id ? "https://i.ytimg.com/vi/{$video_id}/maxresdefault.jpg" : 'default.jpg';
 
 // Debug thumbnail URL
 error_log("Special Program Banner: ID {$banner_video['id']}, Title: {$banner_video['title']}, Thumbnail URL: {$banner_thumbnail}");
@@ -39,6 +39,30 @@ error_log("Special Program Banner: ID {$banner_video['id']}, Title: {$banner_vid
     </a>
 </div>
 
+<!-- Slider Section (Unchanged) -->
+<!-- <div class="special-program-slider mb-5 mx-auto" style="max-width: 1200px;">
+    <div class="swiper">
+        <div class="swiper-wrapper">
+            <?php foreach ($special_programs as $video) { ?>
+                <div class="swiper-slide">
+                    <a href="<?php echo htmlspecialchars($video['youtube_url']); ?>" target="_blank">
+                        <div class="card glass-card">
+                            <img src="<?php echo htmlspecialchars($video['thumbnail_url'] ?? 'default.jpg'); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($video['title']); ?>" style="height: 200px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/360x200?text=Image+Failed+to+Load'; this.onerror=null;">
+                            <div class="card-body text-center">
+                                <div class="video-title"><?php echo htmlspecialchars($video['title']); ?></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <?php } ?>
+        </div>
+   
+        <div class="swiper-pagination"></div>
+  
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</div> -->
 
 <!-- Swiper JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
